@@ -10,12 +10,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Atualizar npm (corrige erro edgesOut)
+        run: |
+          npm install --global npm@11.6.0
+          node --version
+          npm --version
       - name: Instalar dependencias
         run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
       - name: Testar regras de negocio
         run: npm test
       - name: Compilar Angular
