@@ -1,0 +1,112 @@
+<div class="app-shell">
+  <header class="masthead">
+    <div class="mast-inner">
+      <div class="logo" aria-hidden="true">▥</div>
+      <div>
+        <div class="eyebrow">Ferramenta administrativa · demonstração acadêmica</div>
+        <h1>Sistema de Geração de Etiquetas para Triagem Neonatal</h1>
+        <p class="mast-subtitle">Pimaco 6187 · Papel Carta · 80 etiquetas por folha · Código 128</p>
+      </div>
+      <span class="top-pill">Sem dados clínicos</span>
+    </div>
+  </header>
+
+  <main class="content">
+    <nav class="steps" aria-label="Etapas do gerador">
+      <button type="button" class="step" [class.active]="stage() === 1" [class.done]="stage() > 1" (click)="goTo(1)" [attr.aria-current]="stage() === 1 ? 'step' : null">
+        <span class="step-number">1</span><span><strong>Configuração</strong><small>Definir os parâmetros</small></span>
+      </button>
+      <div class="step-divider" aria-hidden="true"></div>
+      <button type="button" class="step" [disabled]="!job()" [class.active]="stage() === 2" [class.done]="stage() > 2" (click)="goTo(2)" [attr.aria-current]="stage() === 2 ? 'step' : null">
+        <span class="step-number">2</span><span><strong>Pré-visualização</strong><small>Conferir as etiquetas</small></span>
+      </button>
+      <div class="step-divider" aria-hidden="true"></div>
+      <button type="button" class="step" [disabled]="!job()" [class.active]="stage() === 3" (click)="goTo(3)" [attr.aria-current]="stage() === 3 ? 'step' : null">
+        <span class="step-number">3</span><span><strong>Impressão</strong><small>Preparar as folhas</small></span>
+      </button>
+    </nav>
+
+    @if (stage() === 1) {
+      <section class="panel form-panel" aria-labelledby="configuration-title">
+        <div class="panel-heading">
+          <div><p class="section-kicker">ETAPA 01</p><h2 id="configuration-title">Configurar a geração</h2><p>Informe os dados para produzir as etiquetas numeradas.</p></div>
+          <span class="pill">7 dígitos · 2 cópias por padrão</span>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="createJob()" novalidate>
+          <div class="field-grid">
+            <div class="field"><label for="start">Número inicial *</label><input id="start" type="number" min="0" step="1" formControlName="start" aria-describedby="start-help"><small id="start-help">Exemplo fictício: 9000000</small></div>
+            <div class="field"><label for="quantity">Quantidade de números *</label><input id="quantity" type="number" min="1" step="1" formControlName="quantity"><small>Quantidade de identificadores distintos</small></div>
+            <div class="field"><label for="digits">Quantidade de dígitos *</label><input id="digits" type="number" min="1" max="12" step="1" formControlName="digits"><small>Zeros à esquerda quando necessário</small></div>
+            <div class="field"><label for="copies">Cópias por número *</label><input id="copies" type="number" min="1" step="1" formControlName="copies"><small>Por padrão, duas cópias consecutivas</small></div>
+            <div class="field"><label for="firstSlot">Começar na etiqueta nº *</label><input id="firstSlot" type="number" min="1" max="80" step="1" formControlName="firstSlot"><small>De 1 a 80 para aproveitar a primeira folha</small></div>
+            <div class="field"><label for="sheetStart">Número inicial da folha *</label><input id="sheetStart" type="number" min="0" step="1" formControlName="sheetStart"><small>Identificação impressa no canto da folha</small></div>
+            <div class="field"><label for="offsetX">Ajuste horizontal (mm) *</label><input id="offsetX" type="number" step="0.5" formControlName="offsetX"><small>Negativo: esquerda · positivo: direita</small></div>
+            <div class="field"><label for="offsetY">Ajuste vertical (mm) *</label><input id="offsetY" type="number" step="0.5" formControlName="offsetY"><small>Negativo: sobe · positivo: desce</small></div>
+          </div>
+          @if (error()) { <div class="alert error" role="alert"><strong>⚠ Verifique os parâmetros.</strong> {{ error() }}</div> }
+          <div class="panel-footer"><p>Os identificadores são processados em memória; não utilize dados de pacientes nesta demonstração.</p><button type="submit" class="btn primary">Gerar e pré-visualizar <span aria-hidden="true">→</span></button></div>
+        </form>
+      </section>
+      <aside class="help-grid"><div class="help-card"><strong>▤ Formato fixo</strong><span>80 etiquetas · 4 colunas × 20 linhas · papel Carta</span></div><div class="help-card"><strong>⌁ Calibração</strong><span>Compense deslocamentos horizontal e vertical da impressora</span></div><div class="help-card"><strong>◫ Folhas parciais</strong><span>Escolha a primeira posição a ser ocupada</span></div></aside>
+    }
+
+    @if (stage() === 2 && job(); as config) {
+      <section class="panel" aria-labelledby="preview-title">
+        <div class="panel-heading"><div><p class="section-kicker">ETAPA 02</p><h2 id="preview-title">Pré-visualização das etiquetas</h2><p>Confira a sequência antes da impressão.</p></div><span class="pill">Code 128</span></div>
+        <div class="stats"><div><small>Etiquetas</small><strong>{{ labelCount() }}</strong></div><div><small>Folhas</small><strong>{{ pageCount() }}</strong></div><div><small>Primeiro número</small><strong>{{ firstIdentifier() }}</strong></div><div><small>Último número</small><strong>{{ lastIdentifier() }}</strong></div></div>
+        <div class="preview-grid"><div>
+          <div class="preview-nav"><span>Folha {{ previewPageIndex() + 1 }} de {{ pageCount() }}</span><div><button type="button" class="btn ghost small" [disabled]="previewPageIndex() === 0" (click)="previousPage()">← Anterior</button><button type="button" class="btn ghost small" [disabled]="previewPageIndex() + 1 >= pageCount()" (click)="nextPage()">Próxima →</button></div></div>
+          <div class="paper-scroll">
+            @if (page(); as currentPage) {
+              <div class="paper screen-paper" aria-label="Pré-visualização da folha de etiquetas">
+                <div class="sheet-number">{{ currentPage.sheetNumber }}</div><div class="sheet-date">{{ generationDate() }}</div>
+                @for (slot of slots; track slot) {
+                  <div class="outline" [style.left.mm]="x(config, slot)" [style.top.mm]="y(config, slot)"></div>
+                }
+                @for (item of currentPage.labels; track item.slot) {
+                  <div class="printed-label" [style.left.mm]="x(config, item.slot)" [style.top.mm]="y(config, item.slot)">
+                    <img [src]="barcode.uri(item.value)" [alt]="'Código de barras do número ' + item.value" width="117" height="20" />
+                    <span>{{ item.value }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div><aside class="review-sidebar"><h3>Conferência</h3><div class="review-row"><span>Cópias por número</span><strong>{{ config.copies }}</strong></div><div class="review-row"><span>Dígitos</span><strong>{{ config.digits }}</strong></div><div class="review-row"><span>Posição inicial</span><strong>{{ config.firstSlot }}</strong></div><div class="review-row"><span>Ajuste X / Y</span><strong>{{ config.offsetX }} / {{ config.offsetY }} mm</strong></div><div class="notice">Esta é a representação digital. A posição física depende da escala, do navegador e da impressora. Faça um teste com números fictícios.</div></aside></div>
+        <div class="bottom-actions"><button type="button" class="btn ghost" (click)="goTo(1)">← Voltar e ajustar</button><button type="button" class="btn primary" (click)="goTo(3)">Continuar para impressão →</button></div>
+      </section>
+    }
+
+    @if (stage() === 3 && job(); as config) {
+      <section class="panel" aria-labelledby="result-title">
+        <div class="panel-heading"><div><p class="section-kicker">ETAPA 03</p><h2 id="result-title">Etiquetas prontas para impressão</h2><p>Confirme as opções do navegador antes de utilizar as folhas físicas.</p></div><span class="pill">Geradas digitalmente</span></div>
+        <div class="success-notice" role="status"><span aria-hidden="true">✓</span><div><strong>{{ labelCount() }} etiquetas preparadas digitalmente.</strong><p>{{ pageCount() }} folha(s), de {{ firstIdentifier() }} até {{ lastIdentifier() }}. A conclusão da impressão física deverá ser conferida pelo funcionário.</p></div></div>
+        <h3 class="print-heading">Configurações recomendadas para impressão</h3>
+        <div class="print-settings"><div><span>Formato do papel</span><strong>Carta (Letter)</strong></div><div><span>Escala</span><strong>100% / tamanho real</strong></div><div><span>Margens extras</span><strong>Desativadas</strong></div><div><span>Cabeçalhos e rodapés</span><strong>Desativados</strong></div></div>
+        <div class="alert warning" role="note"><strong>⚠ Atenção:</strong> faça uma impressão de teste. O ajuste em milímetros não substitui a configuração do driver da impressora.</div>
+        @if (error()) { <div class="alert error" role="alert">{{ error() }}</div> }
+        @if (progress()) { <p role="status" aria-live="polite">{{ progress() }}</p> }
+        <div class="bottom-actions wrap"><button type="button" class="btn ghost" (click)="goTo(2)">← Voltar à pré-visualização</button><button type="button" class="btn ghost" (click)="startOver()">Nova geração</button><button type="button" class="btn primary" (click)="print()" [disabled]="preparing()">{{ preparing() ? 'Preparando folhas...' : 'Imprimir etiquetas' }} ⎙</button></div>
+      </section>
+    }
+
+    <footer class="footer">Projeto acadêmico de software · ODS 3 — Saúde e Bem-Estar · Sem dados de pacientes</footer>
+  </main>
+</div>
+
+<!-- A versão completa das páginas é montada somente ao iniciar a impressão. -->
+<div class="print-host" aria-hidden="true">
+  @if (job(); as config) {
+    @for (p of printPages(); track p.index) {
+      <section class="paper print-paper">
+        <div class="sheet-number">{{ p.sheetNumber }}</div><div class="sheet-date">{{ generationDate() }}</div>
+        @for (item of p.labels; track item.slot) {
+          <div class="printed-label" [style.left.mm]="x(config, item.slot)" [style.top.mm]="y(config, item.slot)">
+            <img [src]="barcode.uri(item.value)" alt="" width="117" height="20" />
+            <span>{{ item.value }}</span>
+          </div>
+        }
+      </section>
+    }
+  }
+</div>

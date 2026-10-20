@@ -1,0 +1,19 @@
+# Angular / Node
+node_modules/
+/dist/
+/.angular/
+/coverage/
+/.cache/
+*.log
+# Secrets and machine settings
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Dados institucionais e arquivos reais nunca pertencem ao repositório
+**/dados-reais/
+**/pacientes/
+**/amostras-reais/
