@@ -45,6 +45,26 @@ describe('geração de etiquetas Pimaco 6187', () => {
     expect(positionMm({ ...sample, offsetX: 1.5 }, 1).left).toBe(62.95);
   });
 
+  it('preserva sequência de sete dígitos em 100 folhas, sem estabelecer teto de 100', () => {
+    const cfg = { ...sample, start: 1601224, quantity: 4000, copies: 2 };
+    expect(getPageCount(cfg)).toBe(100);
+    expect(buildPage(cfg, 0).labels[0].value).toBe('1601224');
+    expect(buildPage(cfg, 0).labels[1].value).toBe('1601224');
+    expect(buildPage(cfg, 99).labels[79].value).toBe('1605223');
+    expect(getPageCount({ ...cfg, quantity: 4001 })).toBe(101);
+  });
+
+  it('continua as cópias após preencher as últimas posições da primeira folha', () => {
+    const cfg = { ...sample, start: 1601224, quantity: 3, firstSlot: 79 };
+    const primeira = buildPage(cfg, 0);
+    const segunda = buildPage(cfg, 1);
+    expect(primeira.labels.map(label => label.slot)).toEqual([78, 79]);
+    expect(primeira.labels.map(label => label.value)).toEqual(['1601224', '1601224']);
+    expect(segunda.labels.map(label => label.value)).toEqual([
+      '1601225', '1601225', '1601226', '1601226'
+    ]);
+  });
+
   it('rejeita dados impróprios e quantidades que excedem precisão segura', () => {
     expect(getValidationError({ ...sample, firstSlot: 81 })).toBeTruthy();
     expect(getValidationError({ ...sample, quantity: 0 })).toBeTruthy();
