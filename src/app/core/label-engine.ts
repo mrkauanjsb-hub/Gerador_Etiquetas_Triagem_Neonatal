@@ -63,6 +63,10 @@ export function getValidationError(config: LabelConfig): string | null {
   if (!Number.isSafeInteger(config.quantity * config.copies)) {
     return 'A quantidade total de etiquetas excede a precisão numérica suportada.';
   }
+  // Somar as posições vazias da primeira folha não pode causar perda de precisão.
+  if (!Number.isSafeInteger((config.firstSlot - 1) + totalLabels(config))) {
+    return 'O total de posições da impressão excede a precisão numérica suportada.';
+  }
   if (!Number.isSafeInteger(config.sheetStart + getPageCount(config) - 1)) {
     return 'A numeração das folhas excede a precisão numérica suportada.';
   }
