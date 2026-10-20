@@ -65,6 +65,17 @@ describe('geração de etiquetas Pimaco 6187', () => {
     ]);
   });
 
+  it('rejeita total de posições que perde precisão com a primeira folha parcial', () => {
+    const cfg = {
+      ...sample,
+      start: 0,
+      quantity: Number.MAX_SAFE_INTEGER,
+      copies: 1,
+      firstSlot: 2
+    };
+    expect(getValidationError(cfg)).toContain('total de posições');
+  });
+
   it('rejeita dados impróprios e quantidades que excedem precisão segura', () => {
     expect(getValidationError({ ...sample, firstSlot: 81 })).toBeTruthy();
     expect(getValidationError({ ...sample, quantity: 0 })).toBeTruthy();
