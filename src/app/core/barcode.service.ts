@@ -16,7 +16,9 @@ export class BarcodeService {
     JsBarcode(element, value, {
       format: 'CODE128', displayValue: false,
       lineColor: '#101c2c', background: '#ffffff',
-      width: 1.4, height: 35, margin: 0, marginLeft: 10, marginRight: 10
+      // Adequa a proporção do SVG à área de 39 × 5,2 mm da etiqueta.
+      // As margens preservam áreas claras para a leitura do Code 128.
+      width: 2.6, height: 35, margin: 0, marginLeft: 26, marginRight: 26
     });
     const markup = new XMLSerializer().serializeToString(element);
     // A origem é exclusivamente um SVG construído pela biblioteca com conteúdo numérico validado.

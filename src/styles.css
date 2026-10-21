@@ -67,7 +67,9 @@ h2 { font-size: clamp(21px, 2.5vw, 26px); letter-spacing: -.5px; margin: 4px 0 8
 .outline, .printed-label { position: absolute; width: 44.45mm; height: 12.7mm; }
 .outline { border: .15mm dashed #e0e3e7; }
 .printed-label { display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; background: #fff; padding: .65mm .7mm .45mm; }
-.printed-label img { display: block; width: 31mm; height: 5.2mm; object-fit: fill; }
+/* Largura intermediária de 32 mm para o Code 128, preservando a área clara nas
+   laterais da etiqueta Pimaco 6187. Mantém a altura e a distribuição 4 × 20. */
+.printed-label img { display: block; width: 32mm; height: 5.2mm; object-fit: fill; }
 .printed-label span { display: block; font: 11.2pt/4mm Arial, sans-serif; letter-spacing: .18mm; white-space: nowrap; margin-top: .25mm; }
 .review-sidebar { border: 1px solid #deeaed; border-radius: 10px; padding: 19px; align-self: start; }
 .review-sidebar h3 { font-size: 16px; margin: 0 0 16px; }
