@@ -65,7 +65,7 @@
                 }
                 @for (item of currentPage.labels; track item.slot) {
                   <div class="printed-label" [style.left.mm]="x(config, item.slot)" [style.top.mm]="y(config, item.slot)">
-                    <img [src]="barcode.uri(item.value)" [alt]="'Código de barras do número ' + item.value" width="117" height="20" />
+                    <img [src]="barcode.uri(item.value)" [alt]="'Código de barras do número ' + item.value" width="147" height="20" />
                     <span>{{ item.value }}</span>
                   </div>
                 }
@@ -102,7 +102,7 @@
         <div class="sheet-number">{{ p.sheetNumber }}</div><div class="sheet-date">{{ generationDate() }}</div>
         @for (item of p.labels; track item.slot) {
           <div class="printed-label" [style.left.mm]="x(config, item.slot)" [style.top.mm]="y(config, item.slot)">
-            <img [src]="barcode.uri(item.value)" alt="" width="117" height="20" />
+            <img [src]="barcode.uri(item.value)" alt="" width="147" height="20" />
             <span>{{ item.value }}</span>
           </div>
         }
